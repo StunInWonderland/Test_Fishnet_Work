@@ -10,6 +10,7 @@ public class IP_Manager : MonoBehaviour
 {
     public Tugboat _tugboat;
     public TMP_InputField _inputField;
+    
     // Start is called before the first frame update
     void Start()
     {

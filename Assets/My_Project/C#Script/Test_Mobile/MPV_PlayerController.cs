@@ -11,6 +11,8 @@ using System;
 using static UnityEngine.Rendering.DebugUI;
 using static UnityEngine.InputSystem.DefaultInputActions;
 using UnityEngine.InputSystem.EnhancedTouch;
+using FishNet.Demo.AdditiveScenes;
+using FishNet.Object.Synchronizing;
 
 public class MPV_PlayerController : NetworkBehaviour
 {
@@ -216,9 +218,9 @@ public class MPV_PlayerController : NetworkBehaviour
             playerAction.Crawl(isCrawl);
 
             if (isCrouch)
-                SetCollision(0.4f,0.86f, 1);
+                Server_ChangeCollisionSize(this.gameObject,0.4f,0.86f, 1);
             else
-                SetCollision(0.65f, 1.4f, 1);
+                Server_ChangeCollisionSize(this.gameObject, 0.65f, 1.4f, 1);
         }
         else 
         { 
@@ -240,9 +242,9 @@ public class MPV_PlayerController : NetworkBehaviour
             playerAction.Crouch(isCrouch);
 
             if (isCrawl)
-                SetCollision(0.2f,1.4f,2);
+                Server_ChangeCollisionSize(this.gameObject, 0.2f,1.4f,2);
             else
-                SetCollision(0.65f,1.4f, 1);
+                Server_ChangeCollisionSize(this.gameObject, 0.65f,1.4f, 1);
 
         }
         else { }
@@ -266,10 +268,23 @@ public class MPV_PlayerController : NetworkBehaviour
         }
     }
 
-    private void SetCollision(float y_center,float height,int direction)
+    public void SetCollision(float y_center,float height,int direction)
     {
         capsuleCollider.height = height;
         capsuleCollider.center = new Vector3(0, y_center,0);
         capsuleCollider.direction = direction;
+    }
+    [ServerRpc]
+    public void Server_ChangeCollisionSize( GameObject player, float y_center, float height, int direction)
+    {
+        Observers_ChangeCollisionSize(player,y_center, height, direction);
+        // mPV_Player.SetCollision(y_center, height, direction);
+    }
+    [ObserversRpc]
+    public void Observers_ChangeCollisionSize(GameObject player, float y_center, float height, int direction)
+    {
+        player.GetComponent<MPV_PlayerController>().capsuleCollider.height = height;
+        player.GetComponent<MPV_PlayerController>().capsuleCollider.center = new Vector3(0, y_center, 0);
+        player.GetComponent<MPV_PlayerController>().capsuleCollider.direction = direction;
     }
 }
